@@ -37,8 +37,6 @@ func SetupTestDatabase() *TestDatabase {
 		log.Fatal("failed to setup test", err)
 	}
 
-	time.Sleep(time.Second)
-
 	config := Config{
 		Environment:      "DEV",
 		DatabaseHost:     host,
@@ -92,7 +90,9 @@ func createContainer(ctx context.Context) (testcontainers.Container, string, str
 			Networks:       []string{networkName},
 			NetworkAliases: map[string][]string{networkName: {databaseHost}},
 			Env:            env,
-			WaitingFor:     wait.ForLog("database system is ready to accept connections"),
+			WaitingFor: wait.ForLog("database system is ready to accept connections").
+				WithOccurrence(2).
+				WithStartupTimeout(5 * time.Second),
 		},
 		Started: true,
 	}
